@@ -21,11 +21,11 @@ namespace MvcApplication.Controllers
         {
             return View();
         }
-        //
+
         public static SqlConnection con =
             new SqlConnection(ConfigurationManager.ConnectionStrings["MsSqlConnection"].ToString());
 
-        // GET: /Base/DRZ_PAYER_SPECIFICATION
+        // GET: /DR/DRZ_PAYER_SPECIFICATION
         [HttpGet]
         public JArray DRZ_PAYER_SPECIFICATION(string data)
         {
@@ -62,81 +62,75 @@ namespace MvcApplication.Controllers
             }
 
         }
-        #region"sp 사용하는 방법"
+
+
+        #region"DBSPR_IPJUASRECEIPT_AP"
         // POST: /Base/                                                       
-        [HttpPost]
-        public JArray Index( )
+        [HttpGet]
+        public JArray DBSPR_IPJUASRECEIPT_AP(string data)
         {
-
-            //System.Diagnostics.Debug.WriteLine(test.log);
-            //System.Diagnostics.Debug.WriteLine(test.sendinfo);
-
-            #region"쿼리문"
-            /*
-            //쿼리문 전송
-            string quary = "select * from my_test_table;";
-            SqlCommand cmd2 = new SqlCommand(quary, con);
-            cmd2.CommandType = CommandType.Text;
-            con.Open();
-            my_test_table dataList = cmd2.ExecuteReader();
-            */
-            #endregion
-
+            var json = JObject.Parse(data);
+            System.Diagnostics.Debug.WriteLine(json.SelectToken("@CD_ACNTUNIT"));
 
             //저장 프로시저 사용
-            SqlCommand cmd = new SqlCommand("DAAPR_FAMILY_SELECT", con);
+            SqlCommand cmd = new SqlCommand("DBSPR_IPJUASRECEIPT_API", con);
 
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@ID_SABUN", 19821001);
+            cmd.Parameters.AddWithValue("@CD_SITE", json.SelectToken("@ID_SABUN"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@DS_DONG", json.SelectToken("@DS_DONG"));
+            cmd.Parameters.AddWithValue("@DS_CUNG", json.SelectToken("@DS_CUNG"));
+            cmd.Parameters.AddWithValue("@DS_HO", json.SelectToken("@DS_HO"));
+            cmd.Parameters.AddWithValue("@NO_HADOCONT", json.SelectToken("@NO_HADOCONT"));
+            cmd.Parameters.AddWithValue("@DT_JEOBSU", json.SelectToken("@DT_JEOBSU"));
+            cmd.Parameters.AddWithValue("@RM_CUSTOMER", json.SelectToken("@RM_CUSTOMER"));
+            cmd.Parameters.AddWithValue("@CD_UH", json.SelectToken("@CD_UH"));
+            cmd.Parameters.AddWithValue("@CD_WI", json.SelectToken("@CD_WI"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
+            cmd.Parameters.AddWithValue("@CD_CTM", json.SelectToken("@CD_CTM"));
 
-            con.Open();
-            SqlDataReader readData = cmd.ExecuteReader();
+            try
+            {
+                con.Open();
+                SqlDataReader readData = cmd.ExecuteReader();
+                var jsondata = ToJson(readData);
+                System.Diagnostics.Debug.Write(jsondata);
+                var jsonArray = JArray.Parse(jsondata);
 
-            var jsondata = ToJson(readData);
-            System.Diagnostics.Debug.Write(jsondata);
-            var json3Array = JArray.Parse(jsondata);
+                cmd.Dispose();
+                readData.Close();
+                con.Close();
 
-            /*
-            var jsonArray2 = new JArray();
-            while (rd.Read()) {
-                var json2 = new JObject();
-                System.Diagnostics.Debug.WriteLine(rd.FieldCount);
-                for(int i=0;i<rd.FieldCount;i++){
-                    System.Diagnostics.Debug.Write(rd.GetString(i)+"");
-                }
-                System.Diagnostics.Debug.WriteLine("");
-                json2.Add("CD_FAMILY", rd.GetString(1));
-                jsonArray2.Add(json2);
+                return jsonArray;
             }
-             */
-
-            //cmd.CommandText = string.Format("");
-
-            //cmd.CommandType = CommandType.Text;
-
-            //cmd.ExecuteNonQuery();
-
-            //SqlDataReader 종료
-            //connection 종료
-
-            cmd.Dispose();
-            readData.Close();
-            con.Close();
-
-
-            //Test 클래스로 데이터 받고 사용하기
-            //json Array
-            var jsonArray = new JArray();
-            var json = new JObject();
-            //json.Add("log", test.log);
-            //json.Add("sendinfo", test.sendinfo);
-            jsonArray.Add(json);
-
-            return json3Array;
+            catch (Exception ex)
+            {
+                JObject jsonO = new JObject();
+                jsonO.Add("result", ex.ToString());
+                var jsonArray = new JArray();
+                jsonArray.Add(jsonO);
+                return jsonArray;
+            }
         }
         #endregion
 
-        //테이블을 json으로 변경
+
+        #region"json으로 변경"
         public string ToJson(SqlDataReader rdr)
         {
             StringBuilder sb = new StringBuilder();
@@ -166,7 +160,7 @@ namespace MvcApplication.Controllers
                 return sw.ToString();
             }
         }
-
+        #endregion
 
     }
 }
